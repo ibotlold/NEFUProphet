@@ -21,9 +21,13 @@ public class Main {
         TelegramBotsApi botsApi = new TelegramBotsApi();
 
         try {
-            botsApi.registerBot(new ProphetBot());
-            System.out.println("Prophet bot start succesfully!");
+            System.out.println("Launching bot...");
+            ProphetBot bot = new ProphetBot();
+            botsApi.registerBot(bot);
+            System.out.println("Bot started succesfully!");
+            bot.connectToDB();
         } catch (TelegramApiException e) {
+            System.out.println("!Bot crashed!" + e.getMessage());
             e.printStackTrace();
         }
     }
