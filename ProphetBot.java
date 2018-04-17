@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.postgresql.jdbc.*;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -20,8 +21,10 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
  * @author ibotlold
  */
 public class ProphetBot extends TelegramLongPollingBot {
+
     public Connection db;
-    public void connectToDB() throws TelegramApiException{
+
+    public void connectToDB() throws TelegramApiException {
         Connection connection = null;
         try {
             System.out.println("Connecting to DB...");
@@ -35,6 +38,7 @@ public class ProphetBot extends TelegramLongPollingBot {
             }
         }
     }
+
     private static Connection getConnection() throws URISyntaxException, SQLException {
         URI dbUri = new URI(System.getenv("DATABASE_URL"));
         String username = dbUri.getUserInfo().split(":")[0];
@@ -42,11 +46,30 @@ public class ProphetBot extends TelegramLongPollingBot {
         String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
         return DriverManager.getConnection(dbUrl, username, password);
     }
-    
+
     @SuppressWarnings("CallToPrintStackTrace")
     public void onUpdateReceived(Update update) {
+        if (update.hasMessage() && update.getMessage().getText().equalsIgnoreCase("/start")) {
+            try {
+                Statement st = db.createStatement();
+                ResultSet rs = st.executeQuery(("SELECT * FROM groups"));
+                while (rs.next()) {
+                    //System.out.println(rs.getString(1));
+                    SendMessage message = new SendMessage()
+                            .setChatId(update.getMessage().getChatId())
+                            .setText(rs.getString(1));
+                    try {
+                        execute(message);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ProphetBot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         // TODO
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        /*if (update.hasMessage() && update.getMessage().hasText()) {
             SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
                 .setChatId(update.getMessage().getChatId())
                 .setText(update.getMessage().getChat().getFirstName() + ", " + update.getMessage().getText().toLowerCase());
@@ -55,7 +78,7 @@ public class ProphetBot extends TelegramLongPollingBot {
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     @Override
