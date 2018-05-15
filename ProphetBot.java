@@ -68,6 +68,43 @@ public class ProphetBot extends TelegramLongPollingBot {
                 Logger.getLogger(ProphetBot.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        if (update.hasMessage() && update.getMessage().getText().startsWith("ИМИ-")) {
+            try {
+                Statement st = db.createStatement();
+                ResultSet rs = st.executeQuery(("SELECT * FROM groups LIKE " + update.getMessage().getText()));
+                String grp = null;
+                while (rs.next()) {
+                    //System.out.println(rs.getString(1));
+                    if (grp != null) {
+                        grp = rs.getString(1);
+                    } else {
+                        grp = "no";
+                    }
+                }
+                if (grp.equals("no") && grp.equals(null)) {
+                    SendMessage message = new SendMessage()
+                            .setChatId(update.getMessage().getChatId())
+                            .setText("Группа не найдена");
+                    try {
+                        execute(message);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    SendMessage message = new SendMessage()
+                            .setChatId(update.getMessage().getChatId())
+                            .setText("Следующая пара: 14:00 Математическое и имитационное моделирование. ");
+                    try {
+                        execute(message);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+            } catch (SQLException ex) {
+                Logger.getLogger(ProphetBot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         // TODO
         /*if (update.hasMessage() && update.getMessage().hasText()) {
             SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
