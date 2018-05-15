@@ -71,7 +71,7 @@ public class ProphetBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().getText().startsWith("ИМИ-")) {
             try {
                 Statement st = db.createStatement();
-                ResultSet rs = st.executeQuery(("SELECT * FROM groups LIKE " + update.getMessage().getText()));
+                ResultSet rs = st.executeQuery(("SELECT * FROM groups WHERE group LIKE " + update.getMessage().getText()));
                 String grp = null;
                 while (rs.next()) {
                     //System.out.println(rs.getString(1));
